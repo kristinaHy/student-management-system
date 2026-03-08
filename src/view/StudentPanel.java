@@ -4,6 +4,7 @@ import controller.StudentController;
 import model.Student;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.File;
@@ -11,94 +12,129 @@ import java.util.List;
 
 public class StudentPanel extends JPanel {
 
-    JTextField name=new JTextField();
-    JTextField email=new JTextField();
-    JTextField phone=new JTextField();
+    JTextField nameField = new JTextField();
+    JTextField emailField = new JTextField();
+    JTextField phoneField = new JTextField();
 
-    JComboBox gender=new JComboBox(new String[]{"Male","Female"});
+    JComboBox<String> genderBox =
+            new JComboBox<>(new String[]{"Male","Female"});
 
-    JLabel photoLabel=new JLabel("No Image");
+    JLabel photoPreview = new JLabel("No Image",SwingConstants.CENTER);
 
-    JTable table=new JTable();
+    JTable table = new JTable();
 
     String photoPath="";
 
-    StudentController controller=new StudentController();
+    StudentController controller = new StudentController();
 
     public StudentPanel(){
 
         setLayout(new BorderLayout());
+        setBackground(new Color(0,170,140));
 
-        setBackground(new Color(0,200,160));
+        // LEFT FORM PANEL
+        JPanel formPanel = new JPanel();
+        formPanel.setPreferredSize(new Dimension(280,500));
+        formPanel.setLayout(new GridLayout(12,1,8,8));
+        formPanel.setBorder(new EmptyBorder(15,15,15,15));
+        formPanel.setBackground(new Color(0,170,140));
 
-        JPanel left=new JPanel(new GridLayout(10,1,5,5));
+        formPanel.add(new JLabel("Student Name"));
+        formPanel.add(nameField);
 
-        left.setPreferredSize(new Dimension(300,500));
+        formPanel.add(new JLabel("Gender"));
+        formPanel.add(genderBox);
 
-        left.add(new JLabel("Student Name"));
-        left.add(name);
+        formPanel.add(new JLabel("Email"));
+        formPanel.add(emailField);
 
-        left.add(new JLabel("Gender"));
-        left.add(gender);
+        formPanel.add(new JLabel("Phone"));
+        formPanel.add(phoneField);
 
-        left.add(new JLabel("Email"));
-        left.add(email);
+        // Photo Preview
+        photoPreview.setPreferredSize(new Dimension(120,120));
+        photoPreview.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        left.add(new JLabel("Phone"));
-        left.add(phone);
+        JButton browseBtn = new JButton("Browse Photo");
 
-        JButton browse=new JButton("Browse Photo");
+        browseBtn.addActionListener(e -> choosePhoto());
 
-        browse.addActionListener(e->choosePhoto());
+        formPanel.add(browseBtn);
+        formPanel.add(photoPreview);
 
-        left.add(browse);
+        // Buttons
+        JButton addBtn = new JButton("Add New");
+        JButton deleteBtn = new JButton("Delete");
+        JButton refreshBtn = new JButton("Refresh");
 
-        left.add(photoLabel);
+        styleButton(addBtn);
+        styleButton(deleteBtn);
+        styleButton(refreshBtn);
 
-        JButton add=new JButton("Add New");
-        JButton delete=new JButton("Delete");
-        JButton refresh=new JButton("Refresh");
+        addBtn.addActionListener(e -> addStudent());
+        deleteBtn.addActionListener(e -> deleteStudent());
+        refreshBtn.addActionListener(e -> loadStudents());
 
-        add.addActionListener(e->addStudent());
-        delete.addActionListener(e->deleteStudent());
-        refresh.addActionListener(e->loadStudents());
+        formPanel.add(addBtn);
+        formPanel.add(deleteBtn);
+        formPanel.add(refreshBtn);
 
-        left.add(add);
-        left.add(delete);
-        left.add(refresh);
+        add(formPanel,BorderLayout.WEST);
 
-        add(left,BorderLayout.WEST);
+        // TABLE PANEL
+        table.setRowHeight(28);
+        table.setFont(new Font("Segoe UI",Font.PLAIN,14));
 
-        table.setRowHeight(25);
+        table.getTableHeader().setFont(new Font("Segoe UI",Font.BOLD,14));
 
-        add(new JScrollPane(table),BorderLayout.CENTER);
+        JScrollPane scroll = new JScrollPane(table);
+
+        add(scroll,BorderLayout.CENTER);
 
         loadStudents();
     }
 
+    // STYLE BUTTON
+    private void styleButton(JButton btn){
+
+        btn.setBackground(new Color(40,130,200));
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setFont(new Font("Segoe UI",Font.BOLD,14));
+    }
+
+    // PHOTO BROWSER
     private void choosePhoto(){
 
-        JFileChooser chooser=new JFileChooser();
+        JFileChooser chooser = new JFileChooser();
 
         if(chooser.showOpenDialog(this)==JFileChooser.APPROVE_OPTION){
 
-            File file=chooser.getSelectedFile();
+            File file = chooser.getSelectedFile();
 
-            photoPath=file.getAbsolutePath();
+            photoPath = file.getAbsolutePath();
 
-            photoLabel.setText(file.getName());
+            ImageIcon icon = new ImageIcon(photoPath);
+
+            Image img = icon.getImage().getScaledInstance(
+                    120,120,Image.SCALE_SMOOTH
+            );
+
+            photoPreview.setIcon(new ImageIcon(img));
+            photoPreview.setText("");
         }
     }
 
+    // ADD STUDENT
     private void addStudent(){
 
-        Student s=new Student(
+        Student s = new Student(
 
                 0,
-                name.getText(),
-                gender.getSelectedItem().toString(),
-                email.getText(),
-                phone.getText(),
+                nameField.getText(),
+                genderBox.getSelectedItem().toString(),
+                emailField.getText(),
+                phoneField.getText(),
                 photoPath
         );
 
@@ -107,24 +143,29 @@ public class StudentPanel extends JPanel {
         loadStudents();
     }
 
+    // DELETE STUDENT
     private void deleteStudent(){
 
-        int row=table.getSelectedRow();
+        int row = table.getSelectedRow();
 
-        if(row==-1) return;
+        if(row==-1){
+            JOptionPane.showMessageDialog(this,"Select a row first");
+            return;
+        }
 
-        int id=(int)table.getValueAt(row,0);
+        int id = (int)table.getValueAt(row,0);
 
         controller.deleteStudent(id);
 
         loadStudents();
     }
 
+    // LOAD STUDENTS
     private void loadStudents(){
 
-        List<Student> list=controller.getStudents();
+        List<Student> list = controller.getStudents();
 
-        DefaultTableModel model=new DefaultTableModel();
+        DefaultTableModel model = new DefaultTableModel();
 
         model.setColumnIdentifiers(new String[]{
                 "ID","Name","Gender","Email","Phone","Photo"
