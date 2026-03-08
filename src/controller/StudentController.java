@@ -1,13 +1,23 @@
 package controller;
 
+import dao.StudentDAO;
+import model.Student;
+
+import java.util.List;
+
 public class StudentController {
 
-    public void saveStudent(String name, String email) {
+    StudentDAO dao=new StudentDAO();
 
-        System.out.println("Saving student...");
-        System.out.println("Name: " + name);
-        System.out.println("Email: " + email);
-
+    public void addStudent(Student s){
+        dao.addStudent(s);
     }
 
+    public List<Student> getStudents(){
+        return dao.getStudents();
+    }
+
+    public void deleteStudent(int id){
+        dao.deleteStudent(id);
+    }
 }
