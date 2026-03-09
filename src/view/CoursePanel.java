@@ -1,4 +1,13 @@
 package view;
 
-public class CoursePanel {
+import javax.swing.*;
+
+public class CoursePanel extends JPanel {
+
+    public CoursePanel(){
+
+        add(new JLabel("Course Panel"));
+
+    }
+
 }

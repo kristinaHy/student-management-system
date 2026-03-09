@@ -184,5 +184,19 @@ public class StudentPanel extends JPanel {
         }
 
         table.setModel(model);
+        table.getSelectionModel().addListSelectionListener(e -> {
+
+            int row = table.getSelectedRow();
+
+            if(row>=0){
+
+                nameField.setText(table.getValueAt(row,1).toString());
+                genderBox.setSelectedItem(table.getValueAt(row,2));
+                emailField.setText(table.getValueAt(row,3).toString());
+                phoneField.setText(table.getValueAt(row,4).toString());
+            }
+
+        });
     }
+
 }

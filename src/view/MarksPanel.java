@@ -1,4 +1,13 @@
 package view;
 
-public class MarksPanel {
+import javax.swing.*;
+
+public class MarksPanel extends JPanel {
+
+    public MarksPanel(){
+
+        add(new JLabel("Marks Panel"));
+
+    }
+
 }
